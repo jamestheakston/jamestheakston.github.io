@@ -80,8 +80,8 @@
             <!-- Navigation Menu -->
             <nav id="main-nav" class="mobile-menu-hidden md:block">
                 <ul class="flex flex-col md:flex-row md:space-x-8 mt-4 md:mt-0 items-center">
-                    <li><a href="#about" class="block py-2 px-4 hover:bg-blue-800 rounded-lg transition duration-300 font-medium">About</a></li>
-                    <li><a href="#skills" class="block py-2 px-4 hover:bg-blue-800 rounded-lg transition duration-300 font-medium">Skills</a></li>
+                    <li><a href="about.html" class="block py-2 px-4 hover:bg-blue-800 rounded-lg transition duration-300 font-medium">About</a></li>
+                    <li><a href="ai.html" class="block py-2 px-4 hover:bg-blue-800 rounded-lg transition duration-300 font-medium">AI</a></li>
                     <li><a href="#projects" class="block py-2 px-4 hover:bg-blue-800 rounded-lg transition duration-300 font-medium">Projects</a></li>
                     <li><a href="#contact" class="block py-2 px-4 hover:bg-blue-800 rounded-lg transition duration-300 font-medium">Contact</a></li>
                 </ul>
@@ -104,7 +104,7 @@
         </div>
     </section>
 
-    <!-- Skills Section -->
+    <!-- My Skills Section -->
     <section id="skills" class="py-20 px-4 sm:px-6 lg:px-8 bg-white">
         <div class="max-w-5xl mx-auto">
             <h2 class="text-4xl font-extrabold text-gray-900 mb-12 text-center">My Skills</h2>
@@ -112,19 +112,14 @@
                 <div class="bg-white p-8 rounded-2xl shadow-lg border border-blue-200 hover:shadow-xl transition duration-300 transform hover:-translate-y-1">
                     <h3 class="text-2xl font-bold text-blue-700 mb-4 text-center">Web Design</h3>
                     <ul class="list-none p-0 text-gray-700 space-y-2 text-lg">
-                        <li class="flex items-center justify-center"><span class="mr-2 text-blue-500">&bull;</span> UI/UX Principles</li>
-                        <li class="flex items-center justify-center"><span class="mr-2 text-blue-500">&bull;</span> Figma/Sketch</li>
-                        <li class="flex items-center justify-center"><span class="mr-2 text-blue-500">&bull;</span> Responsive Design</li>
-                        <li class="flex items-center justify-center"><span class="mr-2 text-blue-500">&bull;</span> Wireframing & Prototyping</li>
+                        <li class="flex items-center justify-center"><span class="mr-2 text-blue-500">&bull;</span> Comfortable with using no code platforms.</li>
                     </ul>
                 </div>
                 <div class="bg-white p-8 rounded-2xl shadow-lg border border-green-200 hover:shadow-xl transition duration-300 transform hover:-translate-y-1">
                     <h3 class="text-2xl font-bold text-green-700 mb-4 text-center">Front-end Development</h3>
                     <ul class="list-none p-0 text-gray-700 space-y-2 text-lg">
-                        <li class="flex items-center justify-center"><span class="mr-2 text-green-500">&bull;</span> HTML5, CSS3</li>
-                        <li class="flex items-center justify-center"><span class="mr-2 text-green-500">&bull;</span> JavaScript (ES6+)</li>
-                        <li class="flex items-center justify-center"><span class="mr-2 text-green-500">&bull;</span> React.js</li>
-                        <li class="flex items-center justify-center"><span class="mr-2 text-green-500">&bull;</span> Tailwind CSS</li>
+                        <li class="flex items-center justify-center"><span class="mr-2 text-green-500">&bull;</span> Basic HTML Skills</li>
+                        <li class="flex items-center justify-center"><span class="mr-2 text-green-500">&bull;</span> Basic Javascript skills (such as using console.log and alert)</li>
                     </ul>
                 </div>
                 <div class="bg-white p-8 rounded-2xl shadow-lg border border-purple-200 hover:shadow-xl transition duration-300 transform hover:-translate-y-1">
@@ -144,16 +139,14 @@
     <section id="projects" class="py-20 px-4 sm:px-6 lg:px-8 bg-white">
         <div class="max-w-5xl mx-auto">
             <h2 class="text-4xl font-extrabold text-gray-900 mb-12 text-center">My Projects</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <!-- Project Card 1 -->
-                <div class="bg-gray-50 p-6 rounded-2xl shadow-md border border-gray-200 flex flex-col h-full">
-                    <img src="https://placehold.co/600x400/e2e8f0/64748b?text=Project+1+Image" alt="Project 1 Placeholder" class="w-full h-48 object-cover rounded-lg mb-4 shadow-sm">
+            <div class="flex justify-center"> <!-- Changed to flex and justify-center -->
+                <!-- Project Card 1: PC Scanner -->
+                <div class="bg-gray-50 p-6 rounded-2xl shadow-md border border-gray-200 flex flex-col h-full w-full md:max-w-2xl">
+                    <img src="https://d1.awsstatic.com/customer-references-case-studies-logos/customer-pages_logos/GitHub_Logo%402x.3a06ebf3e72c7db82f1c5c6e07b0fbe2f4323390.png" alt="GitHub Logo" class="w-full h-48 object-contain rounded-lg mb-4 shadow-sm onerror="this.onerror=null;this.src='https://placehold.co/600x400/e2e8f0/64748b?text=Image+Not+Found';">
                     <h3 class="text-2xl font-semibold text-gray-800 mb-3">PC Scanner</h3>
-                    <p class="text-gray-600 mb-4 flex-grow">An AI-powered open-source which scans your computer for potential viruses </p>
-                    <a href="#" class="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-300 shadow-md text-center font-medium">View Project</a>
+                    <p class="text-gray-600 mb-4 flex-grow">Scan for .exe files, .cmd files and .vbs files on your computer using this free tool - and it's made with AI. Developer/testing versions can be found under the releases section.</p>
+                    <a href="https://github.com/freetechdownloads/pcscanner" target="_blank" class="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-300 shadow-md text-center font-medium">View Project</a>
                 </div>
-                
-                <!-- Add more project cards as needed -->
             </div>
             <div class="text-center mt-12">
                 <p class="text-xl text-gray-700 font-medium">More exciting projects coming soon!</p>
@@ -186,7 +179,7 @@
                 </div>
             </form>
             <div class="text-center mt-12 text-gray-700 text-lg">
-                <p>You can also reach me directly at: <a href="#" class="text-blue-600 hover:underline font-medium">my email address</a></p>
+                <!-- Removed: <p>You can also reach me directly at: <a href="mailto:your.email@example.com" class="text-blue-600 hover:underline font-medium">your.email@example.com</a></p> -->
             </div>
         </div>
     </section>
@@ -195,7 +188,7 @@
     <footer class="bg-gray-900 text-white py-10 px-4 sm:px-6 lg:px-8 rounded-t-2xl">
         <div class="max-w-5xl mx-auto text-center text-gray-400 text-lg">
             <p>&copy; 2025 James Theakston. All rights reserved.</p>
-            <p class="mt-3">Designed with <span class="text-red-500">&hearts;</span> and built with Tailwind CSS.</p>
+            <p class="mt-3">Designed with <span class="text-red-500">&hearts;</span> and built with Tailwind CSS and Google Gemini.</p>
         </div>
     </footer>
 
