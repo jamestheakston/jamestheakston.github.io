@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyMicrobit - Unofficial Microbit Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for the Inter font and overall look */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light gray background */
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align to top to prevent squishing on small screens */
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background-color: #ffffff;
+            border-radius: 1.5rem; /* More rounded corners */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            overflow: hidden; /* Ensures rounded corners are visible */
+            padding: 2.5rem; /* Increased padding */
+            box-sizing: border-box;
+        }
+        .page-section {
+            display: block; /* Always visible for the index page */
+        }
+        .button-primary {
+            /* Enhanced shadow and focus ring for better distinction */
+            @apply bg-blue-600 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:bg-blue-700 transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-400 focus:ring-opacity-75;
+        }
+        .button-secondary {
+            /* Darker initial background, stronger hover, and more prominent shadow/border */
+            @apply bg-gray-300 text-gray-800 font-semibold py-3 px-6 rounded-xl shadow-lg border border-gray-400 hover:bg-gray-400 transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-gray-400 focus:ring-opacity-75;
+        }
+        .input-field {
+            @apply w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200;
+        }
+        .info-card {
+            @apply bg-blue-50 p-4 rounded-lg border border-blue-200 text-blue-800 text-sm;
+        }
+        .flex-col-center {
+            @apply flex flex-col items-center justify-center;
+        }
+        .text-gradient {
+            background-image: linear-gradient(to right, #4F46E5, #3B82F6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Main Modal specific styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background-color: #ffffff;
+            border-radius: 1.5rem;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            padding: 2.5rem;
+            max-width: 90%;
+            width: 500px;
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            position: relative;
+        }
+        .modal-overlay.show .modal-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Tooltip specific styles (for beta label) */
+        .group .absolute {
+            transform: translateX(-50%);
+            left: 50%;
+            top: auto; /* Ensure it positions relative to its group parent for bottom positioning */
+            bottom: 100%; /* Position above the element */
+            white-space: nowrap; /* Prevent text wrapping */
+        }
+
+        /* Beta Warning Modal specific styles */
+        #beta-warning-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); /* Slightly less opaque to see main modal underneath */
+            backdrop-filter: blur(3px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001; /* Higher z-index than main modal */
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        #beta-warning-modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        #beta-warning-modal-content {
+            background-color: #ffe0b2; /* Light orange background for warning */
+            color: #e65100; /* Darker orange text */
+            border-radius: 1rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            padding: 2rem;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        #beta-warning-modal-overlay.show #beta-warning-modal-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        #beta-warning-modal-content h3 {
+            font-size: 1.75rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        #beta-warning-modal-content p {
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <nav class="mb-8 flex justify-center space-x-4">
+            <button id="nav-home" class="button-secondary">Home</button>
+            <button id="nav-connect" class="button-secondary">Connect</button>
+            <a href="details.html" class="button-secondary flex items-center justify-center">Details</a>
+        </nav>
+
+        <section id="index-page" class="page-section text-center">
+            <h1 class="text-5xl font-extrabold mb-4 text-gradient">MyMicrobit</h1>
+            <p class="text-xl text-gray-600 mb-8 max-w-xl mx-auto">
+                Your unofficial hub for seamless Microbit management. Connect, configure, and explore your device with ease.
+            </p>
+            <button id="index-connect-btn" class="button-primary text-xl">
+                Get Started - Connect Your Microbit
+            </button>
+
+            <div class="mt-12">
+                <h2 class="text-3xl font-bold mb-6 text-gray-800">Why Use MyMicrobit?</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="p-6 bg-white rounded-xl shadow-md border border-gray-100 transform transition-transform hover:scale-105 hover:shadow-lg">
+                        <svg class="w-12 h-12 mx-auto mb-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.879a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.102 1.101m-4.879.758c-.902-.23-1.73-.556-2.502-.937C2.98 9.877 2 8.71 2 7.5c0-1.216.98-2.374 2.378-2.925C5.234 4.098 6.64 3.794 8 3.75c1.196-.033 2.393.076 3.55.226z"></path></svg>
+                        <h3 class="text-xl font-semibold mb-2 text-gray-800">Easy Connection</h3>
+                        <p class="text-gray-600">Connect your Microbit via USB or Bluetooth with simple, clear steps.</p>
+                    </div>
+                    <div class="p-6 bg-white rounded-xl shadow-md border border-gray-100 transform transition-transform hover:scale-105 hover:shadow-lg">
+                        <svg class="w-12 h-12 mx-auto mb-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 2v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        <h3 class="text-xl font-semibold mb-2 text-gray-800">Real-time Data</h3>
+                        <p class="text-gray-600">View live sensor data and device status in an intuitive interface.</p>
+                    </div>
+                    <div class="p-6 bg-white rounded-xl shadow-md border border-gray-100 transform transition-transform hover:scale-105 hover:shadow-lg">
+                        <svg class="w-12 h-12 mx-auto mb-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.942 3.33.833 2.35 2.35a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.942 1.543-.833 3.33-2.35 2.35a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.942-3.33-.833-2.35-2.35a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.942-1.543.833-3.33 2.35-2.35a1.724 1.724 0 002.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        <h3 class="text-xl font-semibold mb-2 text-gray-800">Customizable</h3>
+                        <p class="text-gray-600">Future updates will allow you to customize settings and program your Microbit.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Main Connect Modal -->
+    <div id="connect-modal-overlay" class="modal-overlay">
+        <div class="modal-content text-center">
+            <h2 class="text-3xl font-bold mb-6 text-gray-800">Connect Your Microbit</h2>
+            <div class="max-w-md mx-auto bg-blue-50 p-6 rounded-xl border border-blue-200 text-left mb-8">
+                <p class="text-lg font-medium text-blue-800 mb-4">Choose your connection method:</p>
+                <div class="mb-4">
+                    <input type="radio" id="modal-connect-usb" name="connection-method" value="usb" class="mr-2" checked>
+                    <label for="modal-connect-usb" class="text-gray-700">USB Cable</label>
+                    <p class="text-sm text-gray-600 ml-6 mt-1">Plug your Microbit into your computer via USB.</p>
+                </div>
+                <div>
+                    <input type="radio" id="modal-connect-bluetooth" name="connection-method" value="bluetooth" class="mr-2">
+                    <label for="modal-connect-bluetooth" class="text-gray-700">Bluetooth
+                        <span class="relative group">
+                            <span class="bg-purple-100 text-purple-800 text-sm font-bold uppercase px-3 py-1 rounded-md ml-2 cursor-help">Beta</span>
+                            <span class="absolute hidden group-hover:block bottom-full left-1/2 -translate-x-1/2 mb-2 w-max bg-black text-white text-xs px-2 py-1 rounded-md shadow-lg">
+                                Beta Software. May not work as expected.
+                            </span>
+                        </span>
+                    </label>
+                    <p class="text-sm text-gray-600 ml-6 mt-1">Ensure Bluetooth is enabled on your device and Microbit.</p>
+                </div>
+            </div>
+
+            <button id="modal-connect-microbit-btn" class="button-primary text-xl">
+                <span id="modal-connect-button-text">Start Connection</span>
+                <span id="modal-loading-spinner" class="hidden animate-spin h-5 w-5 border-4 border-white border-t-transparent rounded-full ml-2"></span>
+            </button>
+            <p id="modal-connection-status" class="mt-4 text-md text-red-600 hidden"></p>
+
+            <button id="modal-close-btn" class="button-secondary mt-6">Close</button>
+        </div>
+    </div>
+
+    <!-- Beta Warning Modal -->
+    <div id="beta-warning-modal-overlay" class="modal-overlay">
+        <div id="beta-warning-modal-content">
+            <h3 class="text-orange-900">Beta Feature Warning</h3>
+            <p class="text-orange-800">
+                You are attempting to use a Bluetooth connection, which is currently in Beta.
+                This feature may not be fully stable and could contain bugs.
+            </p>
+            <p class="text-orange-800 font-semibold mb-4">Do you wish to continue?</p>
+            <div class="flex justify-center space-x-4">
+                <button id="beta-continue-btn" class="button-primary !bg-orange-600 hover:!bg-orange-700">Continue</button>
+                <button id="beta-cancel-btn" class="button-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // Get references to elements
+        const navHomeBtn = document.getElementById('nav-home');
+        const navConnectBtn = document.getElementById('nav-connect');
+        const indexConnectBtn = document.getElementById('index-connect-btn');
+
+        const connectModalOverlay = document.getElementById('connect-modal-overlay');
+        const modalCloseBtn = document.getElementById('modal-close-btn');
+
+        const modalConnectMicrobitBtn = document.getElementById('modal-connect-microbit-btn');
+        const modalConnectButtonText = document.getElementById('modal-connect-button-text');
+        const modalLoadingSpinner = document.getElementById('modal-loading-spinner');
+        const modalConnectionStatus = document.getElementById('modal-connection-status');
+
+        const modalConnectUsbRadio = document.getElementById('modal-connect-usb');
+        const modalConnectBluetoothRadio = document.getElementById('modal-connect-bluetooth');
+
+        // Beta Warning Modal elements
+        const betaWarningModalOverlay = document.getElementById('beta-warning-modal-overlay');
+        const betaContinueBtn = document.getElementById('beta-continue-btn');
+        const betaCancelBtn = document.getElementById('beta-cancel-btn');
+
+
+        // Function to show the main connection modal and reset to initial state
+        function showConnectModal() {
+            connectModalOverlay.classList.add('show');
+            // Reset all status messages
+            modalConnectionStatus.classList.add('hidden');
+            modalConnectButtonText.textContent = 'Start Connection';
+            modalLoadingSpinner.classList.add('hidden');
+            modalConnectMicrobitBtn.disabled = false;
+        }
+
+        // Function to hide the main connection modal
+        function hideConnectModal() {
+            connectModalOverlay.classList.remove('show');
+        }
+
+        // Function to show the beta warning modal
+        function showBetaWarningModal() {
+            betaWarningModalOverlay.classList.add('show');
+        }
+
+        // Function to hide the beta warning modal
+        function hideBetaWarningModal() {
+            betaWarningModalOverlay.classList.remove('show');
+        }
+
+
+        // Function to fetch Microbit data from the API
+        async function fetchMicrobitData() {
+            const prompt = "Generate realistic, but simulated, Microbit device information and sensor data. Include deviceName, serialNumber, firmwareVersion, boardVersion, lastConnected (use a recent but made-up time like '2 minutes ago'), temperature (between 20-30), lightLevel (0-255), and accelerometer (x, y, z values between -10 and 10).";
+            let chatHistory = [];
+            chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+
+            const payload = {
+                contents: chatHistory,
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            "deviceName": { "type": "STRING" },
+                            "serialNumber": { "type": "STRING" },
+                            "firmwareVersion": { "type": "STRING" },
+                            "boardVersion": { "type": "STRING" },
+                            "lastConnected": { "type": "STRING" },
+                            "sensorData": {
+                                "type": "OBJECT",
+                                "properties": {
+                                    "temperature": { "type": "NUMBER" },
+                                    "lightLevel": { "type": "NUMBER" },
+                                    "accelerometer": {
+                                        "type": "OBJECT",
+                                        "properties": {
+                                            "x": { "type": "NUMBER" },
+                                            "y": { "type": "NUMBER" },
+                                            "z": { "type": "NUMBER" }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "required": ["deviceName", "serialNumber", "firmwareVersion", "boardVersion", "lastConnected", "sensorData"]
+                    }
+                }
+            };
+
+            const apiKey = ""; // API key will be provided by the Canvas environment
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const json = result.candidates[0].content.parts[0].text;
+                    const parsedData = JSON.parse(json);
+                    return parsedData;
+                } else {
+                    console.error("API response structure unexpected:", result);
+                    return null;
+                }
+            } catch (error) {
+                console.error("Error fetching Microbit data:", error);
+                return null;
+            }
+        }
+
+        // Actual WebUSB/WebBluetooth connection logic
+        async function initiateWebAPIDeviceRequest(connectionType) {
+            // Display loading spinner and text immediately
+            modalConnectionStatus.classList.add('hidden'); // Hide any previous error/status
+            modalConnectButtonText.textContent = 'Establishing secure connection...';
+            modalLoadingSpinner.classList.remove('hidden');
+            modalConnectMicrobitBtn.disabled = true;
+
+            // Check if the website is running on HTTPS
+            if (window.location.protocol !== 'https:') {
+                modalConnectionStatus.classList.remove('hidden');
+                modalConnectionStatus.classList.remove('text-green-600');
+                modalConnectionStatus.classList.add('text-red-600');
+                modalConnectionStatus.textContent = 'Connection APIs require HTTPS. Please host on a secure server to proceed.';
+                modalConnectButtonText.textContent = 'Start Connection'; // Reset button
+                modalLoadingSpinner.classList.add('hidden');
+                modalConnectMicrobitBtn.disabled = false;
+                return; // Stop the function execution
+            }
+
+            // If HTTPS is confirmed, update message to 'Waiting for user interaction...' but keep spinner
+            modalConnectionStatus.classList.remove('hidden');
+            modalConnectionStatus.classList.remove('text-red-600');
+            modalConnectionStatus.classList.add('text-blue-600'); // Use blue for informational message
+            modalConnectionStatus.textContent = 'Waiting for user interaction...';
+
+            try {
+                let device;
+                if (connectionType === 'usb') {
+                    if (!navigator.usb) {
+                        throw new Error('WebUSB is not supported in this browser or context.');
+                    }
+                    device = await navigator.usb.requestDevice({ filters: [{ vendorId: 0x0D28 }] });
+                    console.log('USB Device selected:', device);
+                    await device.open();
+                    await device.selectConfiguration(1);
+                    try {
+                        await device.claimInterface(4);
+                        console.log('USB Interface 4 claimed.');
+                    } catch (interfaceError) {
+                        console.warn('Could not claim USB interface 4 (might be already claimed or not present):', interfaceError);
+                    }
+
+
+                    modalConnectionStatus.classList.remove('hidden');
+                    modalConnectionStatus.classList.remove('text-red-600');
+                    modalConnectionStatus.classList.add('text-green-600');
+                    modalConnectionStatus.textContent = `USB Device connected: ${device.productName || 'Microbit'}. Fetching data...`;
+
+                } else if (connectionType === 'bluetooth') {
+                    if (!navigator.bluetooth) {
+                        throw new Error('WebBluetooth is not supported in this browser or context.');
+                    }
+                    device = await navigator.bluetooth.requestDevice({
+                        filters: [{ namePrefix: 'BBC microbit' }],
+                        optionalServices: [
+                            'e95dd91d-251d-470a-a062-fa1922dfa9a8',
+                            'e95d0753-251d-470a-a062-fa1922dfa9a8',
+                            'e95d1195-251d-470a-a062-fa1922dfa9a8',
+                            'e95d1200-251d-470a-a062-fa1922dfa9a8',
+                            'e95d6100-251d-470a-a062-fa1922dfa9a8',
+                            'e95dfb84-251d-470a-a062-fa1922dfa9a8'
+                        ]
+                    });
+                    console.log('Bluetooth Device selected:', device);
+                    const server = await device.gatt.connect();
+                    console.log('Bluetooth GATT Server connected:', server);
+
+                    modalConnectionStatus.classList.remove('hidden');
+                    modalConnectionStatus.classList.remove('text-red-600');
+                    modalConnectionStatus.classList.add('text-green-600');
+                    modalConnectionStatus.textContent = `Bluetooth Device connected: ${device.name || 'Microbit'}. Fetching data...`;
+                }
+
+                const apiData = await fetchMicrobitData();
+                if (apiData) {
+                    localStorage.setItem('microbitData', JSON.stringify(apiData));
+                    hideConnectModal();
+                    window.location.href = 'details.html';
+                } else {
+                    throw new Error('Failed to retrieve Microbit data from API.');
+                }
+
+            } catch (error) {
+                console.error("Connection failed:", error);
+                modalConnectionStatus.classList.remove('hidden');
+                modalConnectionStatus.classList.remove('text-green-600');
+                modalConnectionStatus.classList.add('text-red-600');
+
+                // Determine appropriate error message
+                if (error.name === 'NotFoundError' || error.message.includes('No device found')) {
+                    modalConnectionStatus.textContent = 'No Microbit device selected or found. Please ensure it is connected and visible.';
+                } else if (error.name === 'NotAllowedError' || error.message.includes('denied')) {
+                    modalConnectionStatus.textContent = 'Connection permission denied by user or browser security policy.';
+                } else if (error.message.includes('not supported')) {
+                     modalConnectionStatus.textContent = `Your browser or environment does not support ${connectionType === 'usb' ? 'WebUSB' : 'WebBluetooth'}.`;
+                }
+                else {
+                    modalConnectionStatus.textContent = `Connection failed: ${error.message}.`;
+                }
+
+                modalConnectButtonText.textContent = 'Start Connection';
+                modalLoadingSpinner.classList.add('hidden');
+                modalConnectMicrobitBtn.disabled = false;
+            }
+        }
+
+
+        // Event listeners for main navigation
+        navHomeBtn.addEventListener('click', () => {
+            hideConnectModal();
+            hideBetaWarningModal(); // Also hide beta modal if open
+        });
+        navConnectBtn.addEventListener('click', showConnectModal);
+        indexConnectBtn.addEventListener('click', showConnectModal);
+        modalCloseBtn.addEventListener('click', () => {
+            hideConnectModal();
+            hideBetaWarningModal(); // Also hide beta modal if open
+        });
+        connectModalOverlay.addEventListener('click', (e) => {
+            if (e.target === connectModalOverlay) {
+                hideConnectModal();
+                hideBetaWarningModal(); // Also hide beta modal if clicking outside
+            }
+        });
+
+        // Handle "Start Connection" button click
+        modalConnectMicrobitBtn.addEventListener('click', () => {
+            const connectionType = document.querySelector('input[name="connection-method"]:checked').value;
+
+            if (connectionType === 'bluetooth') {
+                showBetaWarningModal();
+            } else {
+                initiateWebAPIDeviceRequest('usb'); // Direct connection for USB
+            }
+        });
+
+        // Event listeners for Beta Warning Modal buttons
+        betaContinueBtn.addEventListener('click', () => {
+            hideBetaWarningModal();
+            initiateWebAPIDeviceRequest('bluetooth'); // Continue with Bluetooth connection
+        });
+
+        betaCancelBtn.addEventListener('click', () => {
+            hideBetaWarningModal();
+            // Reset main connection modal state if user cancels beta connection
+            modalConnectionStatus.classList.add('hidden');
+            modalConnectButtonText.textContent = 'Start Connection';
+            modalLoadingSpinner.classList.add('hidden');
+            modalConnectMicrobitBtn.disabled = false;
+        });
+
+
+        // Initial page load: ensure modals are hidden and check localStorage for redirect
+        window.onload = function() {
+            hideConnectModal();
+            hideBetaWarningModal();
+            if (localStorage.getItem('openConnectModal') === 'true') {
+                showConnectModal();
+                localStorage.removeItem('openConnectModal');
+            }
+        };
+    </script>
+</body>
+</html>
